@@ -51,8 +51,8 @@ func SigninHandler(w http.ResponseWriter, r *http.Request) {
 
 	//1 校验用户名及密码
 	pwdChecked := dblayer.UserSignin(username, encpasswd)
-	if pwdChecked {
-		w.Write([]byte("FAILED"))
+	if !pwdChecked {
+		w.Write([]byte("FAILED:pwdChecker err"))
 		return
 	}
 
@@ -65,8 +65,60 @@ func SigninHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//3 登录成功后重定向到首页
-	w.Write([]byte("http://" + r.Host + "/static/view/home.html"))
+	//w.Write([]byte("http://" + r.Host + "/static/view/home.html"))
+	resp := util.RespMsg{
+		Code: 0,
+		Msg:  "OK",
+		Data: struct {
+			Location string
+			Username string
+			Token    string
+		}{
+			Location: "http://" + r.Host + "/static/view/home.html",
+			Username: username,
+			Token:    token,
+		},
+	}
+	w.Write(resp.JSONBytes())
+}
 
+func UserInfoHandler(w http.ResponseWriter, r *http.Request) {
+	//1解析请求参数
+	r.ParseForm()
+	username := r.Form.Get("username")
+	//token := r.Form.Get("token")
+	//
+	////2验证token是否有效
+	//isValidToekn := IstokenValid(token)
+	//if isValidToekn {
+	//	w.WriteHeader(http.StatusForbidden)
+	//	return
+	//}
+	//3查询用户信息
+	user, err := dblayer.GetUserInfo(username)
+	if err != nil {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	//4组装并且响应用户数据
+	resp := util.RespMsg{
+		Code: 0,
+		Msg:  "OK",
+		Data: user,
+	}
+	w.Write(resp.JSONBytes())
+}
+
+//token是否有时效性
+func IstokenValid(token string) bool {
+	//TODO 判断token的时效性，是否过期
+	if len(token) != 40 {
+		return false
+	}
+	//TODO 从数据库tbl_user_token查询是否有当前token，
+	//TODO 对比两个token是否一致
+
+	return true
 }
 
 func GenToken(username string) string {

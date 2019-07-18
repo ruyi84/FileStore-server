@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	dblayer "github.com/filestore-server/db"
 	"github.com/filestore-server/meta"
 	"github.com/filestore-server/util"
 	"io"
@@ -14,7 +15,7 @@ import (
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		data, err := ioutil.ReadFile("./static/view/upload.html")
+		data, err := ioutil.ReadFile("./static/view/index.html")
 		if err != nil {
 			io.WriteString(w, "internel server error")
 			return
@@ -51,8 +52,18 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		//meta.UpdateFileMeta(fileMeta)
 		_ = meta.UpdateFileMetaDB(fileMeta)
 
-		fmt.Println(fileMeta.FileSha1)
-		http.Redirect(w, r, "/file/upload/suc", http.StatusFound)
+		//TODO 更新用户文件表
+		r.ParseForm()
+		username := r.Form.Get("username")
+		suc := dblayer.OnUserFileUploadFinished(username, fileMeta.FileSha1, fileMeta.FileName, fileMeta.FileSize)
+		if suc {
+			//fmt.Println(fileMeta.FileSha1)
+			http.Redirect(w, r, "/static/view/home.html", http.StatusFound)
+
+		} else {
+			w.Write([]byte("Upload Failed."))
+		}
+
 	}
 
 }

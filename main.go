@@ -7,6 +7,8 @@ import (
 )
 
 func main() {
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+
 	http.HandleFunc("/file/upload", UploadHandler)
 	http.HandleFunc("/file/upload/suc", UploadSucHandler)
 	http.HandleFunc("/file/meta", GetFileMetaHandler)
@@ -16,6 +18,7 @@ func main() {
 
 	http.HandleFunc("/user/signup", SignupHander)
 	http.HandleFunc("/user/signin", SigninHandler)
+	http.HandleFunc("/user/info", HTTPinterceptor(UserInfoHandler))
 
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
