@@ -61,6 +61,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/static/view/home.html", http.StatusFound)
 
 		} else {
+			fmt.Println("Errr")
 			w.Write([]byte("Upload Failed."))
 		}
 

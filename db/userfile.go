@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	mydb "github.com/filestore-server/db/mysql"
 	"time"
 )
@@ -26,6 +27,7 @@ func OnUserFileUploadFinished(username, filehash, filename string, filesize int6
 
 	_, err = stmt.Exec(username, filehash, filename, filesize, time.Now())
 	if err != nil {
+		fmt.Println(err.Error())
 		return false
 	}
 
