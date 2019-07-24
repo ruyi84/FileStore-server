@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -93,6 +94,27 @@ func GetFileMetaHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+func FileQueryHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	limitCnt, _ := strconv.Atoi(r.Form.Get("limit"))
+	username := r.Form.Get("username")
+
+	userFiles, err := dblayer.QueryUserFileMetes(username, limitCnt)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	data, err := json.Marshal(userFiles)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(data)
+}
+
 func DownloadHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
@@ -163,5 +185,52 @@ func FileDelHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	meta.RemoveFileMeta(fileShar1)
+
+}
+
+func TryFastUploadHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	//1 解析请求参数
+	username := r.Form.Get("username")
+	filehash := r.Form.Get("filehash")
+	filename := r.Form.Get("filename")
+	filezise, _ := strconv.Atoi(r.Form.Get("filesize"))
+
+	//2 从文件表中查询相同hash的文件记录
+	fileMeta, err := meta.GetFileMetaDB(filehash)
+	if err != nil {
+		fmt.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	//3 查不到记录则返回秒传失败
+	if &fileMeta == nil {
+		resp := util.RespMsg{
+			Code: -1,
+			Msg:  "秒传失败，请访问普通上传接口",
+		}
+		w.Write(resp.JSONBytes())
+		return
+	}
+	//4 上传过则将文件信息写入文件用户表，返回成功
+
+	fmt.Println(username, filehash, filename, int64(filezise))
+	suc := dblayer.OnUserFileUploadFinished(username, filehash, filename, int64(filezise))
+	if suc {
+		resp := util.RespMsg{
+			Code: 0,
+			Msg:  "秒传成功",
+		}
+		w.Write(resp.JSONBytes())
+		return
+	} else {
+		resp := util.RespMsg{
+			Code: -2,
+			Msg:  "秒传失败，稍后重试",
+		}
+		w.Write(resp.JSONBytes())
+		return
+	}
 
 }

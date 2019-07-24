@@ -79,6 +79,7 @@ func SigninHandler(w http.ResponseWriter, r *http.Request) {
 			Token:    token,
 		},
 	}
+	fmt.Println(resp.Data)
 	w.Write(resp.JSONBytes())
 }
 
