@@ -22,6 +22,12 @@ func main() {
 	http.HandleFunc("/user/signin", SigninHandler)
 	http.HandleFunc("/user/info", HTTPinterceptor(UserInfoHandler))
 
+	//http.HandlerFunc("/file/mpupload/init",)
+	//http.HandlerFunc("/file/mpupload/uppart",)
+	//http.HandlerFunc("/file/mpupload/complete",)
+	//http.HandlerFunc("/file/mpupload/cancle",)
+	//http.HandlerFunc("/file/mpupload/status",)
+
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		fmt.Printf("Failed to start server,err%s\n", err.Error())
