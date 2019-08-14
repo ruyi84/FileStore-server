@@ -5,7 +5,7 @@ import (
 )
 
 //http请求拦截器
-func HTTPinterceptor(h http.HandlerFunc) http.HandlerFunc {
+func HTTPInterceptor(h http.HandlerFunc) http.HandlerFunc {
 
 	return http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {

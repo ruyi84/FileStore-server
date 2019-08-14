@@ -16,15 +16,15 @@ func main() {
 	http.HandleFunc("/file/download", DownloadHandler)
 	http.HandleFunc("/file/update", FileUpdateMetaHandler)
 	http.HandleFunc("/file/delete", FileDelHandler)
-	http.HandleFunc("/file/fastupload", HTTPinterceptor(TryFastUploadHandler))
+	http.HandleFunc("/file/fastupload", HTTPInterceptor(TryFastUploadHandler))
 
 	http.HandleFunc("/user/signup", SignupHander)
 	http.HandleFunc("/user/signin", SigninHandler)
-	http.HandleFunc("/user/info", HTTPinterceptor(UserInfoHandler))
+	http.HandleFunc("/user/info", HTTPInterceptor(UserInfoHandler))
 
-	//http.HandlerFunc("/file/mpupload/init",)
-	//http.HandlerFunc("/file/mpupload/uppart",)
-	//http.HandlerFunc("/file/mpupload/complete",)
+	http.HandleFunc("/file/mpupload/init", HTTPInterceptor(InitialMultipartUploadHandle))
+	http.HandleFunc("/file/mpupload/uppart", HTTPInterceptor(UploadPartHandler))
+	http.HandleFunc("/file/mpupload/complete", HTTPInterceptor(CompleteUploadHandler))
 	//http.HandlerFunc("/file/mpupload/cancle",)
 	//http.HandlerFunc("/file/mpupload/status",)
 
